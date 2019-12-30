@@ -8,6 +8,12 @@ resource "aws_s3_bucket" "lambda" {
   acl    = "private"
 
   force_destroy = true
+  cors_rule {
+    allowed_headers = ["Authorization"]
+    allowed_methods = ["POST", "GET"]
+    allowed_origins = ["*"]
+    max_age_seconds = 3000
+  }
 }
 
 resource "aws_s3_bucket_object" "lambda" {
@@ -23,7 +29,7 @@ resource "aws_lambda_function" "main" {
   s3_bucket = aws_s3_bucket_object.lambda.bucket
   s3_key    = aws_s3_bucket_object.lambda.key
 
-  handler = "api/main.handler"
+  handler = "main.handler"
   runtime = "python3.7"
 
   role = aws_iam_role.tf_role_for_lambda.arn
