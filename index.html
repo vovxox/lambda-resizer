@@ -382,7 +382,7 @@
 
         $("#widthInput").focusout(function(e) {
             if (customOption == "percent") {
-                $("#heightInput").val(this.value)
+                $("#heightInput").val(this.value);
             }
         });
     });
@@ -430,49 +430,49 @@
         }
     },
     run : function () {
-    // upcontrol.run() : proceed upload file
+        // upcontrol.run() : proceed upload file
 
-    var xhr = new XMLHttpRequest(),
-    data = new FormData();
-    data.append('file-upload', upcontrol.queue[upcontrol.now]);
+        var xhr = new XMLHttpRequest(),
+        data = new FormData();
+        data.append('file-upload', upcontrol.queue[upcontrol.now]);
 
-    // @TODO - ADD MORE POST DATA IF YOU WANT
-    // data.append("foo", "bar");
+        // @TODO - ADD MORE POST DATA IF YOU WANT
+        // data.append("foo", "bar");
 
-    xhr.open('POST', 'simple-upload.php', true);
-    xhr.onload = function (e) {
-    // SHOW UPLOAD STATUS
-    var fstat = document.createElement('div'),
-    txt = upcontrol.queue[upcontrol.now].name + " - ";
-    if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-            // SERVER RESPONSE
-            txt += xhr.responseText;
-        } else {
-            // ERROR
-            txt += xhr.statusText;
+        xhr.open('POST', 'simple-upload.php', true);
+        xhr.onload = function (e) {
+        // SHOW UPLOAD STATUS
+        var fstat = document.createElement('div'),
+        txt = upcontrol.queue[upcontrol.now].name + " - ";
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // SERVER RESPONSE
+                txt += xhr.responseText;
+            } else {
+                // ERROR
+                txt += xhr.statusText;
+            }
         }
-    }
-    fstat.innerHTML = txt;
-    document.getElementById('upstat').appendChild(fstat);
+        fstat.innerHTML = txt;
+        document.getElementById('upstat').appendChild(fstat);
 
-    // UPLOAD NEXT FILE
-    upcontrol.now++;
-    if (upcontrol.now < upcontrol.queue.length) {
-        upcontrol.run();
-    }
-    // ALL DONE
-    else {
-        upcontrol.now = 0;
-        upcontrol.queue = null;
-        document.getElementById('uploader').classList.remove('disabled');
-
-        // @TODO - ADD MESSAGE HERE IF YOU WANT
-        console.log("Upload complete");
+        // UPLOAD NEXT FILE
+        upcontrol.now++;
+        if (upcontrol.now < upcontrol.queue.length) {
+            upcontrol.run();
         }
-    };
-    xhr.send(data);
-    }
+        // ALL DONE
+        else {
+            upcontrol.now = 0;
+            upcontrol.queue = null;
+            document.getElementById('uploader').classList.remove('disabled');
+
+            // @TODO - ADD MESSAGE HERE IF YOU WANT
+            console.log("Upload complete");
+            }
+        };
+        xhr.send(data);
+        }
     };
 
     window.addEventListener("load", function () {
