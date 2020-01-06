@@ -3,6 +3,10 @@
 <title>S3 PreSigned Url Generator</title>
 <meta name="description" content="S3 PreSigned Url Generator">
 <meta name="keywords" content="S3 PreSigned Url Generator">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 <style>
     input[type=text],
     select {
@@ -106,11 +110,70 @@
         font-family: Helvetica;
         text-align: center;
     }
+
+    #uploader {
+        width: 100%; 
+        height: 100px; 
+        text-align: center;
+        vertical-align: center;
+        background: #f4b342;
+        padding: 10px;
+      }
+      #uploader.highlight {
+        background:#ff0;
+      }
+      #uploader.disabled {
+        background:#aaa;
+      }
 </style>
 
 <body>
-    <h1 align="center">PreSigned Url Generator</h1>
+    <h1 align="center">Simple Picture Resizer</h1>
+    <h5 align="center">We don't save your file in server.</h5>
+    <div>------------------------------------------------------------------------------------------------</div>
     <div class="div-page">
+        <div id="uploader">Drop a File Here<br/><button>Select File</button>
+        </div>
+        <div id="uploader"></div>
+        <div><label>Size</label></div>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-info active">
+                <input type="radio" name="sizeOptions" id="option1" autocomplete="off" checked> 25%
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="sizeOptions" id="option2" autocomplete="off"> 50%
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="sizeOptions" id="option3" autocomplete="off"> 75%
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="sizeOptions" id="option4" autocomplete="off"> Custom
+            </label>
+        </div>
+
+        <div class="btn-group btn-group-toggle" data-toggle="buttons" id="customOptionArea" style="display: none;">
+            <label class="btn btn-info active">
+                <input type="radio" name="customOptions" id="percent" autocomplete="off" checked> Percent
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="customOptions" id="pixel" autocomplete="off"> Pixel
+            </label>
+        </div>
+            
+        <div id="customArea" style="display: none;">
+            <div>
+                <label>Width</label>
+            </div>
+            <input type="text" id="widthInput" class="form-control" placeholder="Percent" aria-label="Username" aria-describedby="basic-addon1">
+
+            <div>
+                <label>Height</label>
+            </div>
+            <input type="text" id="heightInput" class="form-control" placeholder="Percent" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        
+        <div>------------------------------------------------------------------------------------------------</div>
+
         <label for="bktNameLbl">Bucket Name</label>
         <input type="text" id="BucketNameId" name="BucketName" placeholder="our-secure-pvt-bkt" value="">
         <label for="bktObjectLbl">Bucket Object Name</label>
@@ -223,6 +286,15 @@
             $('#FileNameId').val(fileName);
         });
     });
+
+    // $(document).ready(function() {
+    //     $('input[type="radio"]').change(function(e) {
+    //         alert("click fired");
+    //         log("abcd");
+    //     });
+    // });
+
+
     /*
     Show the GET / POST buttons based on drop down selection
     */
@@ -273,6 +345,175 @@
             },
         });
     }
+
+    //
+    var sizeOption = "option1"
+    var customOption = "percent"
+
+    $(document).ready(function() {
+        $('input[type="radio"][name="sizeOptions"]').on("click", function(e) {
+            sizeOption = this.id;
+
+            if (sizeOption == "option4") {
+                $("#customOptionArea").show();
+                $("#customArea").show();
+            }
+            else {
+                $("#customOptionArea").hide();
+                $("#customArea").hide();
+            }
+        });
+
+        $("#widthInput").ForceNumericOnly();
+        $("#heightInput").ForceNumericOnly();
+
+        $('input[type="radio"][name="customOptions"]').on("click", function(e) {
+            customOption = this.id;
+
+            if (customOption == "percent") {
+                $("#widthInput").attr("placeholder", "percent");
+                $("#heightInput").attr("placeholder", "percent");
+            }
+            else {
+                $("#widthInput").attr("placeholder", "pixel");
+                $("#heightInput").attr("placeholder", "pixel");
+            }
+        });
+
+        $("#widthInput").focusout(function(e) {
+            if (customOption == "percent") {
+                $("#heightInput").val(this.value)
+            }
+        });
+    });
+
+    // Numeric only control handler
+    jQuery.fn.ForceNumericOnly = function() {
+        return this.each(function()
+        {
+            $(this).keydown(function(e)
+            {
+                var key = e.charCode || e.keyCode || 0;
+                // allow backspace, tab, delete, enter, arrows, numbers and keypad numbers ONLY
+                // home, end, period, and numpad decimal
+                return (
+                    key == 8 || 
+                    key == 9 ||
+                    key == 13 ||
+                    key == 46 ||
+                    key == 110 ||
+                    key == 190 ||
+                    (key >= 35 && key <= 40) ||
+                    (key >= 48 && key <= 57) ||
+                    (key >= 96 && key <= 105));
+            });
+        });
+    };
+
+    /* !! UPDATE : AJAX IS ASYNCHRONOUS !! */
+    /* We do not want users to dump 100 files & upload all at the same time */
+    /* This will create sort of a queue system & upload one at a time */
+    var upcontrol = {
+        queue : null, // upload queue
+        now : 0, // current file being uploaded
+        start : function (files) {
+        // upcontrol.start() : start upload queue
+
+        // WILL ONLY START IF NO EXISTING UPLOAD QUEUE
+        if (upcontrol.queue==null) {
+            // VISUAL - DISABLE UPLOAD UNTIL DONE
+            upcontrol.queue = files;
+            document.getElementById('uploader').classList.add('disabled');
+
+            // PROCESS UPLOAD - ONE BY ONE
+            upcontrol.run();
+        }
+    },
+    run : function () {
+    // upcontrol.run() : proceed upload file
+
+    var xhr = new XMLHttpRequest(),
+    data = new FormData();
+    data.append('file-upload', upcontrol.queue[upcontrol.now]);
+
+    // @TODO - ADD MORE POST DATA IF YOU WANT
+    // data.append("foo", "bar");
+
+    xhr.open('POST', 'simple-upload.php', true);
+    xhr.onload = function (e) {
+    // SHOW UPLOAD STATUS
+    var fstat = document.createElement('div'),
+    txt = upcontrol.queue[upcontrol.now].name + " - ";
+    if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+            // SERVER RESPONSE
+            txt += xhr.responseText;
+        } else {
+            // ERROR
+            txt += xhr.statusText;
+        }
+    }
+    fstat.innerHTML = txt;
+    document.getElementById('upstat').appendChild(fstat);
+
+    // UPLOAD NEXT FILE
+    upcontrol.now++;
+    if (upcontrol.now < upcontrol.queue.length) {
+        upcontrol.run();
+    }
+    // ALL DONE
+    else {
+        upcontrol.now = 0;
+        upcontrol.queue = null;
+        document.getElementById('uploader').classList.remove('disabled');
+
+        // @TODO - ADD MESSAGE HERE IF YOU WANT
+        console.log("Upload complete");
+        }
+    };
+    xhr.send(data);
+    }
+    };
+
+    window.addEventListener("load", function () {
+        // IF DRAG-DROP UPLOAD SUPPORTED
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+        /* [THE ELEMENTS] */
+        var uploader = document.getElementById('uploader');
+
+        /* [VISUAL - HIGHLIGHT DROP ZONE ON HOVER] */
+        uploader.addEventListener("dragenter", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploader.classList.add('highlight');
+        });
+        uploader.addEventListener("dragleave", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploader.classList.remove('highlight');
+        });
+
+        /* [UPLOAD MECHANICS] */
+        // STOP THE DEFAULT BROWSER ACTION FROM OPENING THE FILE
+        uploader.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        // ADD OUR OWN UPLOAD ACTION
+        uploader.addEventListener("drop", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploader.classList.remove('highlight');
+            upcontrol.start(e.dataTransfer.files);
+            });
+        }
+        // FALLBACK - HIDE DROP ZONE IF DRAG-DROP UPLOAD NOT SUPPORTED
+        else {
+            document.getElementById('uploader').style.display = "none";
+        }
+    });
+
 </script>
 </body>
 </html>
