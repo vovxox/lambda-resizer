@@ -7,6 +7,12 @@ from botocore.exceptions import ClientError
 # Set the global variables
 """
 Can Override the global variables using Lambda Environment Parameters
+
+CORS
+https://www.netskope.com/blog/cors-exploitation-in-the-cloud
+
+CORS WHITELIST
+https://stackoverflow.com/questions/56729173/aws-lambda-domain-whitelist
 """
 globalVars = {}
 globalVars["GetDefaultExpiry"] = "10"
@@ -14,14 +20,15 @@ globalVars["PostDefaultExpiry"] = "60"
 
 logger = logging.getLogger()
 
+s3 = boto3.client(
+    "s3", region_name="ap-southeast-2", config=Config(signature_version="s3v4")
+)
+
 
 def signed_get_url(event):
     """Function to generate the presigned GET url, that can be used to retrieve objects from s3 bucket
     Required Bucket Name and Object Name to generate url
     """
-    s3 = boto3.client(
-        "s3", region_name="eu-central-1", config=Config(signature_version="s3v4")
-    )
     bodyData = json.loads(event["body"])
     try:
         url = s3.generate_presigned_url(
@@ -49,7 +56,6 @@ def signed_post_url(event):
     """Function to generate the presigned post url, that can be used to upload objects to s3 bucket
     Required Bucket Name and Object Name to generate url
     """
-    s3 = boto3.client("s3")
     import uuid
 
     bodyData = json.loads(event["body"])
