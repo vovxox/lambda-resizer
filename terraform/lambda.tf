@@ -66,8 +66,17 @@ resource "aws_iam_policy" "s3_access" {
 EOF
 }
 
-
 resource "aws_iam_role_policy_attachment" "lambda_role_policy_attachment" {
   role       = aws_iam_role.tf_role_for_lambda.name
   policy_arn = aws_iam_policy.s3_access.arn
+}
+
+# The "/*/*" portion grants access from any method on any resource
+# within the API Gateway REST API.
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.main.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }

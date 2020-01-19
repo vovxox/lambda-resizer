@@ -3,3 +3,9 @@ variable "region" {
   default     = "ap-southeast-2"
 }
 
+variable "app_version" {
+}
+
+variable "bucket_name" {
+  default = "resizer-lambda-bucket"
+}

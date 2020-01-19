@@ -16,7 +16,7 @@ https://stackoverflow.com/questions/56729173/aws-lambda-domain-whitelist
 """
 globalVars = {}
 globalVars["GetDefaultExpiry"] = "10"
-globalVars["PostDefaultExpiry"] = "60"
+globalVars["PostDefaultExpiry"] = "5"
 
 logger = logging.getLogger()
 

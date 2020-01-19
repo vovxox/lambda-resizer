@@ -1,6 +1,6 @@
 # S3 Bucket and Object. This is where the application is located.
 resource "aws_s3_bucket" "lambda" {
-  bucket = "resizer-lambda-bucket"
+  bucket = var.bucket_name
   acl    = "private"
 
   force_destroy = true
@@ -14,6 +14,6 @@ resource "aws_s3_bucket" "lambda" {
 
 resource "aws_s3_bucket_object" "lambda" {
   bucket = aws_s3_bucket.lambda.id
-  key    = "deploy.zip"
+  key    = "${var.app_version}-deploy.zip"
   source = "../deploy.zip"
 }
