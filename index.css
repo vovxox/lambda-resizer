@@ -1,0 +1,91 @@
+.div-first-page {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    width: 90%;
+    margin: auto;
+    padding: 10px;
+    text-align: center;
+}
+
+.div-second-page {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    width: 90%;
+    margin: auto;
+    padding: 10px;
+    text-align: center;
+}
+
+@media only screen and (min-width: 600px) { 
+    .div-first-page {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 70%;
+        max-width: 500px;
+        margin: auto;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .div-second-page {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 90%;
+        max-width: 500px;
+        margin: auto;
+        padding: 10px;
+        text-align: center;
+    }
+}
+
+#drop_zone {
+    padding: 20px;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#hidden_zone {
+    display: block;
+    border-radius: 5px;
+    background-color: #666666;
+    width: 70%;
+    margin: auto;
+    margin-top: 10px;
+    padding: 10px;
+    text-align: left;
+}
+
+#hidden_zone input[type=text]{
+    display: block;
+    width: 100%;
+}
+
+.div-image-area {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.img-target {
+    max-width: 300px;
+    max-height: 300px;
+    display: block;
+    margin: auto;
+}
+
+.div-options {
+    display: block;
+    text-align: left;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.btn-group {
+    width: 100%;
+}
+
+.btn-success {
+    width: 100%;
+}

@@ -1,0 +1,184 @@
+<html>
+<meta charset="utf-8">
+<title>Simple Picture Resizer</title>
+<meta name="description" content="Simple Picture Resizer">
+<meta name="keywords" content="Simple Picture Resizer">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<style>
+    .div-page {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 90%;
+        margin: auto;
+        padding: 10px;
+        text-align: right;
+    }
+
+    @media only screen and (min-width: 600px) { 
+        .div-page {
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            width: 70%;
+            margin: auto;
+            padding: 10px;
+            text-align: right;
+        }
+    }
+    
+    #drop_zone {
+        padding: 20px;
+        color: #ffffff;
+        border-radius: 5px;
+        width:  100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    #hidden_zone {
+        display: none;
+        border-radius: 5px;
+        background-color: #666666;
+        width: 40%;
+        margin: auto;
+        padding: 10px;
+        text-align: left;
+    }
+
+</style>
+<body>
+    <h1 align="center">Simple Picture Resizer</h1>
+    <div class="div-page">
+        <div class="bg-primary" id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+            <p id="fileNameAreaId">Drag a image file here</p>
+            <button class="btn btn-light" id="fileSelectBtnId">Select File</button>
+        </div>
+        <div>
+            <div></div>
+            <div>
+                <button class="btn btn-success" id="ObjectUploadBtnId">Upload File</button>
+            </div>
+        </div>
+    </div>
+    <div id="hidden_zone">
+        <p>Hidden Area</p>
+        <form enctype="multipart/form-data" method="POST" name="formS3ObjManager" id="formS3ObjManagerId">
+            <input type="file" name="file" id="fileInputId" required />
+        </form>
+        <input type="text" id="bucketNameId" name="BucketName" value="resizer-lambda-bucket">
+        <input type="text" id="methodTypeId" name="MethodType" value="POST">
+        <input type="text" id="fileNameId" name="FileNameId">
+    </div>
+</body>
+<script>
+    //==========================
+    // Get Upload URL
+    //==========================
+    $(document).ready(function() {
+        $("#ObjectUploadBtnId").click(function() {
+            $.ajax({
+                url: 'https://acoszpmj60.execute-api.ap-southeast-2.amazonaws.com/dev',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "BucketName": $('#bucketNameId').val(),
+                    "methodType": $('#methodTypeId').val(),
+                    "FileName": $('#fileNameId').val()
+                }, ),
+                dataType: "json",
+                crossDomain : true,
+                //beforeSend: function(){ $( '#loader' ).show();},
+                success: function(res) {
+                    uploadFile(res, res.url);
+                },
+                error: function(e) {
+                    console.log("Failed: Unable to Get Signed Upload Url" + e.responseText);
+                },
+                complete: function() {
+                    $('#loader').hide();
+                }
+            });
+        });
+
+        /*
+        Function called when file input updated. If there is a file selected, then
+        start upload procedure by asking for a signed URL request from Lambda.
+        */
+        $('input[type="file"]').change(function(e) {
+            var fileName = e.target.files[0].name;
+            $('#fileNameId').val(fileName);
+            $("#fileNameAreaId").text(fileName);
+        });
+
+        $('#fileSelectBtnId').click(function(e) {
+            $('#fileInputId').trigger("click");
+        });
+    });
+
+    //========================================================================================================
+    // Function to carry out the actual POST request to S3 using the signed request from the Python app.
+    //========================================================================================================
+    function uploadFile(s3Data, url) {
+        var formData = new FormData();
+        /*
+        All the PreSigned URL fields to FormData as required by Amazon S3
+        */
+        for (key in s3Data.fields) {
+            formData.append(key, s3Data.fields[key]);
+        };
+        /*
+        Attach the file to be uploaded to FormData
+        */
+        formData.append('file', $('input[type="file"]')[0].files[0]);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data, textStatus, request) {
+                if (request.status === 200 || request.status === 204) {
+                    console.log("Status:" + request.status);
+                } else {
+                    console.log("Br!! Unable to upload Object. Try again!! <br />Status:" + request.status);
+                }
+            },
+        });
+    }
+
+    //=========================
+    // File dropdown handlers
+    //=========================
+    function dropHandler(ev) {
+        console.log('File(s) dropped');
+
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+
+        if (ev.dataTransfer.items) {
+            if (ev.dataTransfer.items[0].kind === 'file') {
+                var file = ev.dataTransfer.items[0].getAsFile();
+                var fileName = file.name;
+                $('#FileNameId').val(fileName)
+                $("#fileNameAreaId").text(fileName);
+            }
+        } else {
+            // Use DataTransfer interface to access the file(s)
+            for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+                console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
+            }
+        }
+    }
+
+    function dragOverHandler(ev) {
+        console.log('File(s) in drop zone'); 
+
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+    }
+</script>
+</html>

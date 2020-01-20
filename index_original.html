@@ -1,0 +1,524 @@
+<html>
+<meta charset="utf-8">
+<title>S3 PreSigned Url Generator</title>
+<meta name="description" content="S3 PreSigned Url Generator">
+<meta name="keywords" content="S3 PreSigned Url Generator">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<style>
+    input[type=text],
+    select {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 24px;
+    }
+    
+    .div-page {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 40%;
+        margin: auto;
+        padding: 10px;
+        text-align: left;
+    }
+    
+    .div-form {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        margin: auto;
+        text-align: center;
+    }
+    
+    .div-obj-holder {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 40%;
+        margin: auto;
+        padding: 10px;
+        height: 200px;
+    }
+    
+    label {
+        font-size: 25px;
+        color: #666;
+    }
+    
+    .UrlSignerBtn:hover {
+        background-color: #45a049;
+    }
+    
+    .UrlSignerBtn {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .ObjectUploadBtn:hover {
+        background-color: #45a049;
+    }
+    
+    .ObjectUploadBtn {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+    
+    a {
+        text-align: left;
+    }
+    
+    .urlText {
+        overflow-x: hidden;
+        float: left;
+        font-size: small;
+        font-style: italic;
+        text-align: center;
+        white-space: nowrap;
+        width: 95%;
+    }
+    
+    .urlText:hover {
+        overflow-x: auto;
+    }
+    
+    body {
+        font-family: Helvetica;
+        text-align: center;
+    }
+
+    #uploader {
+        width: 100%; 
+        height: 100px; 
+        text-align: center;
+        vertical-align: center;
+        background: #f4b342;
+        padding: 10px;
+      }
+      #uploader.highlight {
+        background:#ff0;
+      }
+      #uploader.disabled {
+        background:#aaa;
+      }
+</style>
+
+<body>
+    <h1 align="center">Simple Picture Resizer</h1>
+    <h5 align="center">We don't save your file in server.</h5>
+    <div>------------------------------------------------------------------------------------------------</div>
+    <div class="div-page">
+        <div id="uploader">Drop a File Here<br/><button>Select File</button>
+        </div>
+        <div id="uploader"></div>
+        <div><label>Size</label></div>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-info active">
+                <input type="radio" name="sizeOptions" id="option1" autocomplete="off" checked> 25%
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="sizeOptions" id="option2" autocomplete="off"> 50%
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="sizeOptions" id="option3" autocomplete="off"> 75%
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="sizeOptions" id="option4" autocomplete="off"> Custom
+            </label>
+        </div>
+
+        <div class="btn-group btn-group-toggle" data-toggle="buttons" id="customOptionArea" style="display: none;">
+            <label class="btn btn-info active">
+                <input type="radio" name="customOptions" id="percent" autocomplete="off" checked> Percent
+            </label>
+            <label class="btn btn-info">
+                <input type="radio" name="customOptions" id="pixel" autocomplete="off"> Pixel
+            </label>
+        </div>
+            
+        <div id="customArea" style="display: none;">
+            <div>
+                <label>Width</label>
+            </div>
+            <input type="text" id="widthInput" class="form-control" placeholder="Percent" aria-label="Username" aria-describedby="basic-addon1">
+
+            <div>
+                <label>Height</label>
+            </div>
+            <input type="text" id="heightInput" class="form-control" placeholder="Percent" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        
+        <div>------------------------------------------------------------------------------------------------</div>
+
+        <label for="bktNameLbl">Bucket Name</label>
+        <input type="text" id="BucketNameId" name="BucketName" placeholder="our-secure-pvt-bkt" value="">
+        <label for="bktObjectLbl">Bucket Object Name</label>
+        <input type="text" id="ObjectNameId" name="ObjectName" placeholder="s3.png" value="">
+        <input style='display:none;' type="text" id="FileNameId" name="FileNameId">
+        <label for="OperationTypeLbl">What do you want to do?</label>
+        <select id="methodTypeId" name="methodType">
+            <option value="GET">Read from Bucket</option>
+            <option value="POST" selected="selected">Write to Bucket</option>
+        </select>
+        <div class="div-form" id='uploadFileDiv'>
+            <form enctype="multipart/form-data" method="POST" name="formS3ObjManager" id="formS3ObjManagerId">
+                <input type="file" name="file" required />
+            </form>
+            <button class="UrlSignerBtn" id='ObjectUploadBtnId'><span>Upload File </span></button>
+        </div>
+        <button class="UrlSignerBtn" style='display:none;' id='UrlSignerBtnId'><span>Get Pre Signed Url </span></button>
+    </div>
+    <br />
+    <div class="div-obj-holder" style='display:none;' id="div-obj-holderId">
+        <div id="urlTextId" class="urlText">Url Text Goes here ...</div>
+        <div id="SignedUrlId"></div>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    /*
+              // Sample AJAX Upload function
+              $.ajax({
+                  url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod',
+                  type: 'POST',
+                  contentType: "application/json; charset=utf-8",
+                  data:{"BucketName":"secure-pvt-bucket","ObjectName":"1.png"},
+                  beforeSend: function(){ $( '#loader' ).show();},
+                  success: function( res ) { alert( "Success:"+ res.PreSignedUrl ); },
+                  //success: function( res ) { alert( JSON.stringify(res) ); },
+                  error:function(e){ alert('Lambda returned error\n\n' + e.responseText); },
+                  complete:function(){ $('#loader').hide(); }
+              });
+              */
+    /*
+    Function called when the GET Object Event Button is triggered.
+    Images will be loaded automaticaly at the bottom div, For files, it will just show a null image icon(which is an error, if you have time fix it)
+    */
+    $(document).ready(function() {
+        $("#BucketNameId").val("resizer-lambda-bucket-hoon");
+        $("#ObjectNameId").val("test.png");
+        
+        $("#UrlSignerBtnId").click(function() {
+            $.ajax({
+                url: 'https://8kcuc0mn73.execute-api.ap-southeast-2.amazonaws.com/dev',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "BucketName": $('#BucketNameId').val(),
+                    "ObjectName": $('#ObjectNameId').val(),
+                    "methodType": $('#methodTypeId option:selected').attr('value'),
+                }, ),
+                dataType: "json",
+                crossDomain : true,
+                //beforeSend: function(){ $( '#loader' ).show();},
+                success: function(res) {
+                    $("#urlTextId").html("Your <a href=" + res.PreSignedUrl + ">Pre-Signed Url</a> expires in " + res.ExpiresIn +" Seconds");
+                    $("#SignedUrlId").html("<img src='" + res.PreSignedUrl + "'>");
+                    $("#div-obj-holderId").show();
+                },
+                error: function(e) {
+                    $("#urlTextId").html("Unable to Retrieve Image, Check Object Key name.");
+                    $("#SignedUrlId").html("<i>"+ e.responseText + "</i>");
+                    $("#div-obj-holderId").show();
+                },
+                // complete: function() { $('#loader').hide(); }
+            });
+        });
+    });
+    /*
+    Function called when the Upload Object Event Button is triggered.
+    Gets the Pre-Signed Upload Url and Triggers the Upload Function
+    */
+    $(document).ready(function() {
+        $("#ObjectUploadBtnId").click(function() {
+            $.ajax({
+                url: 'https://8kcuc0mn73.execute-api.ap-southeast-2.amazonaws.com/dev',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "BucketName": $('#BucketNameId').val(),
+                    "methodType": $('#methodTypeId option:selected').attr('value'),
+                    "FileName": $('#FileNameId').val()
+                }, ),
+                dataType: "json",
+                crossDomain : true,
+                //beforeSend: function(){ $( '#loader' ).show();},
+                success: function(res) {
+                    uploadFile(res, res.url);
+                },
+                error: function(e) {
+                    $("#urlTextId").html("Failed: Unable to Get Signed Upload Url" + e.responseText);
+                    $("#SignedUrlId").html("");
+                    $("#div-obj-holderId").show();
+                },
+                complete: function() {
+                    $('#loader').hide();
+                }
+            });
+        });
+    });
+    /*
+       Function called when file input updated. If there is a file selected, then
+       start upload procedure by asking for a signed URL request from Lambda.
+    */
+    $(document).ready(function() {
+        $('input[type="file"]').change(function(e) {
+            var fileName = e.target.files[0].name;
+            $('#FileNameId').val(fileName);
+        });
+    });
+
+    // $(document).ready(function() {
+    //     $('input[type="radio"]').change(function(e) {
+    //         alert("click fired");
+    //         log("abcd");
+    //     });
+    // });
+
+
+    /*
+    Show the GET / POST buttons based on drop down selection
+    */
+    $(document).ready(function() {
+        $('#methodTypeId').on('change', function() {
+            if (this.value == 'POST') {
+                $("#uploadFileDiv").show();
+                $("#UrlSignerBtnId").hide();
+                $("#div-obj-holderId").hide();
+            } else {
+                $("#UrlSignerBtnId").show();
+                $("#uploadFileDiv").hide();
+                $("#div-obj-holderId").hide();
+            }
+        });
+    });
+    /*
+      Function to carry out the actual POST request to S3 using the signed request from the Python app.
+    */
+    function uploadFile(s3Data, url) {
+        var formData = new FormData();
+        /*
+        All the PreSigned URL fields to FormData as required by Amazon S3
+        */
+        for (key in s3Data.fields) {
+            formData.append(key, s3Data.fields[key]);
+        };
+        /*
+        Attach the file to be uploaded to FormData
+        */
+        formData.append('file', $('input[type="file"]')[0].files[0]);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data, textStatus, request) {
+                if (request.status === 200 || request.status === 204) {
+                    $("#urlTextId").html("Status: Uploaded Successfully.<br /> Object Key: " + s3Data.fields.key);
+                    $("#SignedUrlId").html("");
+                    console.log("Status:" + request.status);
+                    $("#div-obj-holderId").show();
+                } else {
+                    $("#urlTextId").html("Br!! Unable to upload Object. Try again!! <br />Status:" + request.status);
+                }
+            },
+        });
+    }
+
+    //
+    var sizeOption = "option1"
+    var customOption = "percent"
+
+    $(document).ready(function() {
+        $('input[type="radio"][name="sizeOptions"]').on("click", function(e) {
+            sizeOption = this.id;
+
+            if (sizeOption == "option4") {
+                $("#customOptionArea").show();
+                $("#customArea").show();
+            }
+            else {
+                $("#customOptionArea").hide();
+                $("#customArea").hide();
+            }
+        });
+
+        $("#widthInput").ForceNumericOnly();
+        $("#heightInput").ForceNumericOnly();
+
+        $('input[type="radio"][name="customOptions"]').on("click", function(e) {
+            customOption = this.id;
+
+            if (customOption == "percent") {
+                $("#widthInput").attr("placeholder", "percent");
+                $("#heightInput").attr("placeholder", "percent");
+            }
+            else {
+                $("#widthInput").attr("placeholder", "pixel");
+                $("#heightInput").attr("placeholder", "pixel");
+            }
+        });
+
+        $("#widthInput").focusout(function(e) {
+            if (customOption == "percent") {
+                $("#heightInput").val(this.value);
+            }
+        });
+    });
+
+    // Numeric only control handler
+    jQuery.fn.ForceNumericOnly = function() {
+        return this.each(function()
+        {
+            $(this).keydown(function(e)
+            {
+                var key = e.charCode || e.keyCode || 0;
+                // allow backspace, tab, delete, enter, arrows, numbers and keypad numbers ONLY
+                // home, end, period, and numpad decimal
+                return (
+                    key == 8 || 
+                    key == 9 ||
+                    key == 13 ||
+                    key == 46 ||
+                    key == 110 ||
+                    key == 190 ||
+                    (key >= 35 && key <= 40) ||
+                    (key >= 48 && key <= 57) ||
+                    (key >= 96 && key <= 105));
+            });
+        });
+    };
+
+    /* !! UPDATE : AJAX IS ASYNCHRONOUS !! */
+    /* We do not want users to dump 100 files & upload all at the same time */
+    /* This will create sort of a queue system & upload one at a time */
+    var upcontrol = {
+        queue : null, // upload queue
+        now : 0, // current file being uploaded
+        start : function (files) {
+        // upcontrol.start() : start upload queue
+
+        // WILL ONLY START IF NO EXISTING UPLOAD QUEUE
+        if (upcontrol.queue==null) {
+            // VISUAL - DISABLE UPLOAD UNTIL DONE
+            upcontrol.queue = files;
+            document.getElementById('uploader').classList.add('disabled');
+
+            // PROCESS UPLOAD - ONE BY ONE
+            upcontrol.run();
+        }
+    },
+    run : function () {
+        // upcontrol.run() : proceed upload file
+
+        var xhr = new XMLHttpRequest(),
+        data = new FormData();
+        data.append('file-upload', upcontrol.queue[upcontrol.now]);
+
+        // @TODO - ADD MORE POST DATA IF YOU WANT
+        // data.append("foo", "bar");
+
+        xhr.open('POST', 'simple-upload.php', true);
+        xhr.onload = function (e) {
+        // SHOW UPLOAD STATUS
+        var fstat = document.createElement('div'),
+        txt = upcontrol.queue[upcontrol.now].name + " - ";
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // SERVER RESPONSE
+                txt += xhr.responseText;
+            } else {
+                // ERROR
+                txt += xhr.statusText;
+            }
+        }
+        fstat.innerHTML = txt;
+        document.getElementById('upstat').appendChild(fstat);
+
+        // UPLOAD NEXT FILE
+        upcontrol.now++;
+        if (upcontrol.now < upcontrol.queue.length) {
+            upcontrol.run();
+        }
+        // ALL DONE
+        else {
+            upcontrol.now = 0;
+            upcontrol.queue = null;
+            document.getElementById('uploader').classList.remove('disabled');
+
+            // @TODO - ADD MESSAGE HERE IF YOU WANT
+            console.log("Upload complete");
+            }
+        };
+        xhr.send(data);
+        }
+    };
+
+    window.addEventListener("load", function () {
+        // IF DRAG-DROP UPLOAD SUPPORTED
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+        /* [THE ELEMENTS] */
+        var uploader = document.getElementById('uploader');
+
+        /* [VISUAL - HIGHLIGHT DROP ZONE ON HOVER] */
+        uploader.addEventListener("dragenter", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploader.classList.add('highlight');
+        });
+        uploader.addEventListener("dragleave", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploader.classList.remove('highlight');
+        });
+
+        /* [UPLOAD MECHANICS] */
+        // STOP THE DEFAULT BROWSER ACTION FROM OPENING THE FILE
+        uploader.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        // ADD OUR OWN UPLOAD ACTION
+        uploader.addEventListener("drop", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploader.classList.remove('highlight');
+            upcontrol.start(e.dataTransfer.files);
+            });
+        }
+        // FALLBACK - HIDE DROP ZONE IF DRAG-DROP UPLOAD NOT SUPPORTED
+        else {
+            document.getElementById('uploader').style.display = "none";
+        }
+    });
+
+</script>
+</body>
+</html>
