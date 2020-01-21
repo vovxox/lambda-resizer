@@ -59,6 +59,8 @@
                 this.selectFileClick = this.selectFileClick.bind(this);
                 this.fileChange = this.fileChange.bind(this);
                 this.uploadClick = this.uploadClick.bind(this);
+                this.dropHandler = this.dropHandler.bind(this);
+                this.dragOverHandler = this.dragOverHandler.bind(this);
             }
 
             componentDidMount() {
@@ -103,8 +105,7 @@
                 if (e.dataTransfer.items) {
                     if (e.dataTransfer.items[0].kind === 'file') {
                         var file = e.dataTransfer.items[0].getAsFile();
-                        var fileName = file.name;
-                        this.state.fileName = fileName;
+                        this.setState({fileName: file.name});
                     }
                 } else {
                     // Use DataTransfer interface to access the file(s)
@@ -124,7 +125,7 @@
                     <div>
                         <h1 align="center">Simple Picture Resizer (Step1)</h1>
                         <div class="div-first-page">
-                            <div class="bg-primary" id="drop_zone" ondrop={ (e) => this.dropHandler(e) } ondragover={ (e) => this.dragOverHandler(e) }>
+                            <div class="bg-primary" id="drop_zone" onDrop={ (e) => this.dropHandler(e) } onDragOver={ (e) => this.dragOverHandler(e) }>
                                 <p id="fileNameAreaId">Drag a image file here</p>
                                 <button class="btn btn-light" id="fileSelectBtnId" onClick={this.selectFileClick}>Select File</button>
                             </div>
